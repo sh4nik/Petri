@@ -20,8 +20,8 @@ public class Food {
     }
 
     public void display() {
-        this.parent.fill(color);
-        this.parent.strokeWeight(1);
+        this.parent.fill(100, 0, 180);
+        this.parent.strokeWeight(0);
         this.parent.pushMatrix();
         this.parent.translate(position.x, position.y);
         this.parent.ellipse(0, 0, size, size);
