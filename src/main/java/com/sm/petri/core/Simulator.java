@@ -74,7 +74,7 @@ public class Simulator extends PApplet {
 
         }
 
-        println(frameRate + " : " + bloops.size() + " : " + bloops.get(0).getHealth());
+        println("TPS " + floor(frameRate) + " : POP " + bloops.size() + " : TOP HEALTH " + floor(bloops.get(0).getHealth()));
 
         for (Bloop newBloop : newBloops) {
             bloops.add(newBloop);
@@ -93,7 +93,9 @@ public class Simulator extends PApplet {
 
     Bloop getNextGenBlob() {
         Bloop selectedBloop = bloops.get((int) Math.floor(random(SELECTION_THRESHOLD_RANKING)));
-        return new Bloop(this, foodList, selectedBloop.getBrain());
+        double[] genes = new double[selectedBloop.getBrain().encodedArrayLength()];
+        selectedBloop.getBrain().encodeToArray(genes);
+        return new Bloop(this, foodList, genes);
     }
 
     @Override

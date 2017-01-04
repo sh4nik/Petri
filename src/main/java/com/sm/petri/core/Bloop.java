@@ -32,7 +32,7 @@ public class Bloop {
     PVector position;
     PVector velocity;
 
-    public Bloop(PApplet parent, List<Food> foodList, BasicNetwork providedBrain) {
+    public Bloop(PApplet parent, List<Food> foodList, double[] providedGenes) {
 
         //initialize values
         this.id = lastId++;
@@ -43,15 +43,15 @@ public class Bloop {
         this.size = 16;
         this.maxSpeed = 3;
 
-        if (providedBrain == null) {
-            brain = new BasicNetwork();
-            brain.addLayer(new BasicLayer(null, true, 2));
-            brain.addLayer(new BasicLayer(new ActivationSigmoid(), true, 2));
-            brain.addLayer(new BasicLayer(new ActivationSigmoid(), false, 1));
-            brain.getStructure().finalizeStructure();
-            brain.reset();
-        } else {
-            brain = providedBrain;
+        brain = new BasicNetwork();
+        brain.addLayer(new BasicLayer(null, true, 2));
+        brain.addLayer(new BasicLayer(new ActivationSigmoid(), true, 2));
+        brain.addLayer(new BasicLayer(new ActivationSigmoid(), false, 1));
+        brain.getStructure().finalizeStructure();
+        brain.reset();
+        
+        if (providedGenes != null) {
+            brain.decodeFromArray(providedGenes);
         }
 
         float x = this.parent.random(1) * this.parent.width;
