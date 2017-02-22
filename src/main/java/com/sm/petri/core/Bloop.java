@@ -11,7 +11,7 @@ import processing.core.PVector;
 public class Bloop {
 
     //common bloop stuff
-    private static int lastId = 0;
+    public static int lastId = 0;
     private static float deathRate = 0.6f;
     private static float foodHealth = 30;
 
@@ -22,6 +22,7 @@ public class Bloop {
     private float size;
     private float maxSpeed;
     private float bodyColor;
+    public boolean isBest = false;
 
     //environment related stuff
     List<Food> foodList;
@@ -49,9 +50,14 @@ public class Bloop {
         brain.addLayer(new BasicLayer(new ActivationSigmoid(), false, 1));
         brain.getStructure().finalizeStructure();
         brain.reset();
-        
+
         if (providedGenes != null) {
             brain.decodeFromArray(providedGenes);
+        } else {
+//            if (id == 1) {
+//                double[] selectedGenes = {-0.13819674902964185,-0.7381820171279883,0.5205323897236473,-0.7988742665388606,-0.6106961050995114,-0.1282980863623957,-0.9383933555816488,0.473817126052265,0.9973757429925454};
+//                brain.decodeFromArray(selectedGenes);
+//            }
         }
 
         float x = this.parent.random(1) * this.parent.width;
@@ -70,14 +76,23 @@ public class Bloop {
 
     public void display() {
         float theta = velocity.heading2D() + PApplet.PI / 2;
-        this.parent.fill(bodyColor);
-        this.parent.stroke(0);
+        if (isBest) {
+            this.parent.fill(200, 50, 100);
+            this.parent.stroke(230);
+        } else {
+            this.parent.fill(bodyColor);
+            this.parent.stroke(0);
+        }
+
         this.parent.strokeWeight(1);
         this.parent.pushMatrix();
         this.parent.translate(position.x, position.y);
         this.parent.rotate(theta);
         this.parent.ellipse(0, 0, size, size);
         this.parent.line(0, 0, 0, -size / 2);
+        this.parent.rotate(-theta);
+        this.parent.fill(100);
+        this.parent.text(id, -10, size * 1.5f);
         this.parent.popMatrix();
     }
 
@@ -88,7 +103,7 @@ public class Bloop {
             double[] senseData = {dif.x, dif.y};
             double[] actionData = new double[1];
             brain.compute(senseData, actionData);
-            rotateVector(velocity, PApplet.map((float) actionData[0], (float) 0, (float) 1, -45, 45));
+            rotateVector(velocity, PApplet.map((float) actionData[0], (float) 0, (float) 1, -90, 90));
             moveAhead();
         }
     }
