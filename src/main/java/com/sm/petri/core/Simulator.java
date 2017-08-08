@@ -14,10 +14,10 @@ public class Simulator extends PApplet {
     List<Bloop> bloops = new ArrayList<>();
     List<Food> foodList = new ArrayList<>();
 
-    private static final int BLOB_COUNT = 40;
-    private static final int FOOD_COUNT = 100;
-    private static final int EVO_START_THRESHOLD_POP = BLOB_COUNT;
-    private static final float MUTATION_RATE = 1f;
+    private static final int BLOB_COUNT = 20;
+    private static final int FOOD_COUNT = 40;
+    private static final int EVO_START_THRESHOLD_POP = 20;
+    private static final float MUTATION_RATE = 0.1f;
 
     private boolean render = true;
 
@@ -165,7 +165,7 @@ public class Simulator extends PApplet {
         }
 
         if (random(1) < MUTATION_RATE) {
-            System.out.println(ANSI_RED + "*************************************************************************************************************" + ANSI_RESET);
+            //System.out.println(ANSI_RED + "*************************************************************************************************************" + ANSI_RESET);
             kidGenes[floor(random(0, brainSize - 1))] = random(-1, 1);
         }
 
