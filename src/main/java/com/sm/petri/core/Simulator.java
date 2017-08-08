@@ -124,7 +124,7 @@ public class Simulator extends PApplet {
             strokeWeight(3);
             float newX = graphTime / 5;
             graphTime++;
-            float newY = height - (bloops.get(0).getHealth() / 10);
+            float newY = (height - ((bloops.get(0).getHealth() / 2) % 500));
             line(previousPlotPoint.x, previousPlotPoint.y, newX, newY);
             previousPlotPoint.x = newX;
             previousPlotPoint.y = newY;
