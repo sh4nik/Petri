@@ -11,9 +11,9 @@ public class TestEnvironment extends PApplet {
     List<Food> foodList = new ArrayList<>();
 
     private static final int BLOB_COUNT = 1;
-    private static final int FOOD_COUNT = 100;
+    private static final int FOOD_COUNT = 10;
     
-    private double[] genes = {-0.5129484620861633,0.08843642387133266,0.11374556312345474,0.7884316144565984,0.7128725124501019,-0.23308464812807617,0.26705296692327085,0.029405804609226482,0.5007853465451828};
+    private double[] genes = {-0.38746798038482666,-0.8490146398544312,-0.7334953546524048,0.641432523727417,0.7474620342254639,0.7084528207778931,-0.15198874473571777,0.7329657077789307,-0.5510956048965454,-0.46473968029022217,-0.014219284057617188,-0.8311880553104549};
 
     public static void main(String[] args) {
         PApplet.main("com.sm.petri.core.TestEnvironment");

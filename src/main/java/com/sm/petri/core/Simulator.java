@@ -15,9 +15,9 @@ public class Simulator extends PApplet {
     List<Food> foodList = new ArrayList<>();
 
     private static final int BLOB_COUNT = 20;
-    private static final int FOOD_COUNT = 40;
+    private static final int FOOD_COUNT = 20;
     private static final int EVO_START_THRESHOLD_POP = 20;
-    private static final float MUTATION_RATE = 0.1f;
+    private static final float MUTATION_RATE = 1f;
 
     private boolean render = true;
 
