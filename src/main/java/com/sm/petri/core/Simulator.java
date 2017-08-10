@@ -154,7 +154,7 @@ public class Simulator extends PApplet {
 
         double[] kidGenes = new double[brainSize];
 
-        int splicePoint = 4;
+        int splicePoint = 6;
 
         for (int i = 0; i < brainSize; i++) {
             if (i < splicePoint) {
@@ -173,13 +173,13 @@ public class Simulator extends PApplet {
     }
 
     private void logStats(List<Bloop> bloops) {
-        String log = "TPS " + floor(frameRate) + " : POP " + bloops.size() + " : THG " + (floor(bloops.get(0).getHealth()) - 255) + " / " + tthg + " : BID " + bloops.get(0).getId() + " : " + bloops.get(0).getBrain().dumpWeights();
-        if ((floor(bloops.get(0).getHealth()) - 255) > tthg) {
-            tthg = (floor(bloops.get(0).getHealth()) - 255);
-            println(ANSI_PURPLE + log + ANSI_RESET);
-        } else {
-            println(log);
-        }
+//        String log = "TPS " + floor(frameRate) + " : POP " + bloops.size() + " : THG " + (floor(bloops.get(0).getHealth()) - 255) + " / " + tthg + " : BID " + bloops.get(0).getId() + " : " + bloops.get(0).getBrain().dumpWeights();
+//        if ((floor(bloops.get(0).getHealth()) - 255) > tthg) {
+//            tthg = (floor(bloops.get(0).getHealth()) - 255);
+//            println(ANSI_PURPLE + log + ANSI_RESET);
+//        } else {
+//            println(log);
+//        }
     }
 
     @Override

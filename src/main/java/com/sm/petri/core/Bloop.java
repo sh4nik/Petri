@@ -47,8 +47,8 @@ public class Bloop {
 
         brain = new BasicNetwork();
         brain.addLayer(new BasicLayer(null, true, 2));
-        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 2));
         brain.addLayer(new BasicLayer(new ActivationTANH(), true, 3));
+        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 4));
         brain.getStructure().finalizeStructure();
         brain.reset();
 
@@ -102,14 +102,11 @@ public class Bloop {
             PVector dis = PVector.sub(nearestFood.getPosition(), position);
             PVector dif = PVector.sub(dis, velocity);
             dif.normalize();
-            double[] senseData = {PApplet.map((float) dif.x, (float) -1, (float) 1, 0, 1), PApplet.map((float) dif.y, (float) -1, (float) 1, 0, 1)};
-//            System.out.println("X: " + dif.x + " : Y:" + dif.y);
-            double[] actionData = new double[3];
+            double[] senseData = {dif.x, dif.y};
+            double[] actionData = new double[4];
             brain.compute(senseData, actionData);
-            velocity = new PVector((float) actionData[0], (float) actionData[1]);
-            this.maxSpeed = (float) actionData[2] * 3.5f;
-//            rotateVector(velocity, PApplet.map((float) actionData[0], (float) 0, (float) 1, -2, 2));
-//            System.out.println("ANGLE: " + actionData[0]);
+            velocity = velocity.add(new PVector((float) actionData[0], (float) actionData[1]).setMag((float) actionData[3] * 3));
+            this.maxSpeed = PApplet.map((float) actionData[2], (float) -1, (float) 1, 0, 1) * 3f;
             moveAhead();
         }
     }
