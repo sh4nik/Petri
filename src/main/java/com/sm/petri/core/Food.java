@@ -20,7 +20,7 @@ public class Food {
     }
 
     public void display() {
-        this.parent.fill(140, 70, 255);
+        this.parent.fill(160, 255, 160);
         this.parent.strokeWeight(0);
         this.parent.pushMatrix();
         this.parent.translate(position.x, position.y);

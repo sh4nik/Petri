@@ -14,10 +14,12 @@ public class Simulator extends PApplet {
     List<Bloop> bloops = new ArrayList<>();
     List<Food> foodList = new ArrayList<>();
 
-    private static final int BLOB_COUNT = 20;
+    private static final int BLOB_COUNT = 4;
+    private static final int MAX_BLOB_COUNT = 70;
     private static final int FOOD_COUNT = 40;
-    private static final int EVO_START_THRESHOLD_POP = 20;
-    private static final float MUTATION_RATE = 1f;
+    private static final int EVO_FORCE_THRESHOLD_POP = 2;
+    private static final float REPRODUCTION_PROBABILITY = 0.0005f;
+    private static final float MUTATION_RATE = 0.3f;
 
     private boolean render = true;
 
@@ -43,7 +45,8 @@ public class Simulator extends PApplet {
 
     @Override
     public void settings() {
-        size(1240, 660);
+//        size(1740, 1460);
+        fullScreen();
     }
 
     @Override
@@ -58,14 +61,14 @@ public class Simulator extends PApplet {
         if (!render) {
             frameRate(600);
             if (!screenCleared) {
-                background(254);
+                background(50);
                 screenCleared = true;
                 graphTime = 0;
                 previousPlotPoint = new PVector(0, 1000);
             }
         } else {
             frameRate(60);
-            background(254);
+            background(50);
             screenCleared = false;
         }
 
@@ -97,10 +100,17 @@ public class Simulator extends PApplet {
 
             if (bloop.getHealth() <= 0) {
                 iter.remove();
-                if (bloops.size() < EVO_START_THRESHOLD_POP) {
+                if (bloops.size() < EVO_FORCE_THRESHOLD_POP) {
                     newBloops.add(getNextGenBloop(bloops));
                 }
             }
+
+//            if (bloop.getHealth() < 300) {
+            if (bloops.size() < MAX_BLOB_COUNT && random(1) < REPRODUCTION_PROBABILITY) {
+                newBloops.add(getNextGenBloop(bloop, bloops.get(0)));
+                bloop.setHealth(bloop.getHealth() - 50);
+            }
+//            }
         }
 
         logStats(bloops);
@@ -135,9 +145,72 @@ public class Simulator extends PApplet {
 
     }
 
+    Bloop getNextGenBloop(Bloop bloop) {
+
+        int brainSize = bloop.getBrain().encodedArrayLength();
+        double[] genes = new double[brainSize];
+        bloop.getBrain().encodeToArray(genes);
+
+        boolean mut = false;
+
+        if (random(1) < MUTATION_RATE) {
+            //System.out.println(ANSI_RED + "*************************************************************************************************************" + ANSI_RESET);
+            genes[floor(random(0, brainSize - 1))] = random(-1, 1);
+            mut = true;
+        }
+
+        Bloop bloopKid = new Bloop(this, foodList, genes);
+
+        if (mut) {
+            bloopKid.setBodyColor(200);
+        }
+
+        return bloopKid;
+    }
+
+    Bloop getNextGenBloop(Bloop bloopDad, Bloop bloopMom) {
+
+        int j = floor(random(2));
+
+        int brainSize = bloopDad.getBrain().encodedArrayLength();
+        double[] dadGenes = new double[brainSize];
+        bloopDad.getBrain().encodeToArray(dadGenes);
+
+        double[] momGenes = new double[brainSize];
+        bloopMom.getBrain().encodeToArray(momGenes);
+
+        double[] kidGenes = new double[brainSize];
+
+        int splicePoint = 6;
+
+        for (int i = 0; i < brainSize; i++) {
+            if (i < splicePoint) {
+                kidGenes[i] = dadGenes[i];
+            } else {
+                kidGenes[i] = momGenes[i];
+            }
+        }
+
+        boolean mut = false;
+
+        if (random(1) < MUTATION_RATE) {
+            //System.out.println(ANSI_RED + "*************************************************************************************************************" + ANSI_RESET);
+            kidGenes[floor(random(0, brainSize - 1))] = random(-1, 1);
+            mut = true;
+        }
+
+        Bloop bloopKid = new Bloop(this, foodList, kidGenes);
+
+        if (mut) {
+            bloopKid.setBodyColor(200);
+        }
+
+        return bloopKid;
+    }
+
     Bloop getNextGenBloop(List<Bloop> bloops) {
-        
-        if(bloops.size() < 2) {
+
+        if (bloops.size() < 2) {
             return new Bloop(this, foodList, null);
         }
 

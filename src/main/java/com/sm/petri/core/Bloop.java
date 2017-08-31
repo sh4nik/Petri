@@ -14,7 +14,7 @@ public class Bloop {
     //common bloop stuff
     public static int lastId = 0;
     private static float deathRate = 0.6f;
-    private static float foodHealth = 30;
+    private static float foodHealth = 200;
 
     //attributes of the individual bloop
     private int id;
@@ -22,7 +22,7 @@ public class Bloop {
     private BasicNetwork brain;
     private float size;
     private float maxSpeed;
-    private float bodyColor;
+    private float bodyColor = -1;
     public boolean isBest = false;
 
     //environment related stuff
@@ -41,14 +41,14 @@ public class Bloop {
         this.foodList = foodList;
         this.parent = parent;
 
-        this.health = 255;
+        this.health = 500;
         this.size = 16;
         this.maxSpeed = 3;
 
         brain = new BasicNetwork();
         brain.addLayer(new BasicLayer(null, true, 2));
         brain.addLayer(new BasicLayer(new ActivationTANH(), true, 3));
-        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 4));
+        brain.addLayer(new BasicLayer(new ActivationTANH(), false, 4));
         brain.getStructure().finalizeStructure();
         brain.reset();
 
@@ -77,20 +77,41 @@ public class Bloop {
 
     public void display() {
         float theta = velocity.heading2D() + PApplet.PI / 2;
+
         if (isBest) {
-            this.parent.fill(200, 50, 100);
-            this.parent.stroke(230);
+            this.parent.fill(180, 100, 240);
+            this.parent.stroke(40);
         } else {
-            this.parent.fill(bodyColor);
-            this.parent.stroke(0);
+            if (bodyColor < 0) {
+                this.parent.fill(120, 150, 255);
+                this.parent.stroke(40);
+            } else {
+                this.parent.fill(bodyColor);
+                this.parent.stroke(40);
+            }
         }
 
-        this.parent.strokeWeight(1);
+        this.parent.strokeWeight(2);
         this.parent.pushMatrix();
         this.parent.translate(position.x, position.y);
         this.parent.rotate(theta);
         this.parent.ellipse(0, 0, size, size);
         this.parent.line(0, 0, 0, -size / 2);
+        if (health < 256) {
+            if (health > 50) {
+                this.parent.fill(health);
+            } else {
+                this.parent.fill(200, 80, 100);
+            }
+        } else {
+            if (isBest) {
+                this.parent.fill(255);
+            } else {
+                this.parent.fill(255);
+            }
+        }
+
+        this.parent.ellipse(0, -size / 2, size / 3, size / 3);
         this.parent.rotate(-theta);
         this.parent.fill(100);
         this.parent.text(id, -10, size * 1.5f);
@@ -118,7 +139,7 @@ public class Bloop {
 
     private void updateHealth() {
         health -= (float) deathRate;
-        bodyColor = health;
+        //bodyColor = health;
     }
 
     void wrapBorders() {
