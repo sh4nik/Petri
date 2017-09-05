@@ -14,16 +14,18 @@ public class Simulator extends PApplet {
     List<Bloop> bloops = new ArrayList<>();
     List<Food> foodList = new ArrayList<>();
 
-    private static final int BLOB_COUNT = 4;
-    private static final int MAX_BLOB_COUNT = 70;
-    private static final int FOOD_COUNT = 40;
+    private static final int BLOB_COUNT = 2;
+    private static final int MAX_BLOB_COUNT = 50;
+    private static final int FOOD_COUNT = 100;
     private static final int EVO_FORCE_THRESHOLD_POP = 2;
-    private static final float REPRODUCTION_PROBABILITY = 0.0005f;
+    private static final float REPRODUCTION_PROBABILITY = 0.0015f;
     private static final float MUTATION_RATE = 0.3f;
 
     private boolean render = true;
 
     private int tthg = 0;
+
+    public static long seed;
 
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
@@ -45,8 +47,14 @@ public class Simulator extends PApplet {
 
     @Override
     public void settings() {
-//        size(1740, 1460);
-        fullScreen();
+        size(1900, 900);
+//        seed = 2147483647;
+        seed = floor(random(System.currentTimeMillis()));
+
+        
+        println("Seed: " + seed);
+        randomSeed(seed);
+//        fullScreen();
     }
 
     @Override
@@ -118,10 +126,11 @@ public class Simulator extends PApplet {
         for (Bloop newBloop : newBloops) {
             bloops.add(newBloop);
         }
-
+//        if (foodList == null || foodList.size() < 6) {
         for (int i = foodList == null ? 0 : foodList.size(); i < FOOD_COUNT; i++) {
             foodList.add(new Food(this));
         }
+//        }
 
         if (render) {
             for (Food food : foodList) {
@@ -181,7 +190,7 @@ public class Simulator extends PApplet {
 
         double[] kidGenes = new double[brainSize];
 
-        int splicePoint = 6;
+        int splicePoint = (int) floor(random(brainSize / 4, brainSize / 4 * 3));
 
         for (int i = 0; i < brainSize; i++) {
             if (i < splicePoint) {
@@ -205,6 +214,7 @@ public class Simulator extends PApplet {
             bloopKid.setBodyColor(200);
         }
 
+//        bloopKid.setPosition(bloopDad.getPosition().copy());
         return bloopKid;
     }
 
@@ -253,6 +263,7 @@ public class Simulator extends PApplet {
 //        } else {
 //            println(log);
 //        }
+        println("Fittest Brain [" + bloops.get(0).getId() + "]: " + bloops.get(0).getBrain().dumpWeights());
     }
 
     @Override

@@ -24,6 +24,10 @@ public class Bloop {
     private float maxSpeed;
     private float bodyColor = -1;
     public boolean isBest = false;
+    
+    private int r;
+    private int g;
+    private int b;
 
     //environment related stuff
     List<Food> foodList;
@@ -46,19 +50,14 @@ public class Bloop {
         this.maxSpeed = 3;
 
         brain = new BasicNetwork();
-        brain.addLayer(new BasicLayer(null, true, 2));
-        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 3));
-        brain.addLayer(new BasicLayer(new ActivationTANH(), false, 4));
+        brain.addLayer(new BasicLayer(null, true, 4));
+        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 4));
+        brain.addLayer(new BasicLayer(new ActivationTANH(), false, 6));
         brain.getStructure().finalizeStructure();
-        brain.reset();
+        brain.reset((int) Simulator.seed);
 
         if (providedGenes != null) {
             brain.decodeFromArray(providedGenes);
-        } else {
-//            if (id == 1) {
-//                double[] selectedGenes = {-0.13819674902964185,-0.7381820171279883,0.5205323897236473,-0.7988742665388606,-0.6106961050995114,-0.1282980863623957,-0.9383933555816488,0.473817126052265,0.9973757429925454};
-//                brain.decodeFromArray(selectedGenes);
-//            }
         }
 
         float x = this.parent.random(1) * this.parent.width;
@@ -112,9 +111,17 @@ public class Bloop {
         }
 
         this.parent.ellipse(0, -size / 2, size / 3, size / 3);
+        
+        this.parent.fill(r, g, b);
+        this.parent.rect(-4, 1, 8, 6);
+        
+        this.parent.strokeWeight(0);
+        this.parent.fill(200, 30);
+        this.parent.rect(-5, 8, 10, maxSpeed * 4);
+        
         this.parent.rotate(-theta);
         this.parent.fill(100);
-        this.parent.text(id, -10, size * 1.5f);
+        //this.parent.text(id, -10, size * 1.5f);
         this.parent.popMatrix();
     }
 
@@ -123,11 +130,15 @@ public class Bloop {
             PVector dis = PVector.sub(nearestFood.getPosition(), position);
             PVector dif = PVector.sub(dis, velocity);
             dif.normalize();
-            double[] senseData = {dif.x, dif.y};
-            double[] actionData = new double[4];
+            double[] senseData = {dif.x, dif.y, nearestFood.isPoison() ? 1 : -1, PApplet.map((float) health > 600 ? 600 : health, (float) 0, (float) 600, -1, 1)};
+            double[] actionData = new double[6];
             brain.compute(senseData, actionData);
-            velocity = velocity.add(new PVector((float) actionData[0], (float) actionData[1]).setMag((float) actionData[3] * 3));
+            velocity = velocity.add(new PVector((float) actionData[0], (float) actionData[1])); //.setMag((float) actionData[3] * 3)
             this.maxSpeed = PApplet.map((float) actionData[2], (float) -1, (float) 1, 0, 1) * 3f;
+            r = (int) Math.floor((double) PApplet.map((float) actionData[3], (float) -1, (float) 1, 100, 255));
+            g = (int) Math.floor((double) PApplet.map((float) actionData[4], (float) -1, (float) 1, 100, 255));
+            b = (int) Math.floor((double) PApplet.map((float) actionData[5], (float) -1, (float) 1, 100, 255));
+            
             moveAhead();
         }
     }
@@ -206,7 +217,11 @@ public class Bloop {
             }
             if (d < this.size - foodItem.getSize()) {
                 iter.remove();
-                health += (float) foodHealth;
+                if (nearestFood.isPoison()) {
+                    health -= (float) foodHealth * 2;
+                } else {
+                    health += (float) foodHealth;
+                }
             }
         }
     }
@@ -273,5 +288,13 @@ public class Bloop {
 
     public static void setFoodHealth(float foodHealth) {
         Bloop.foodHealth = foodHealth;
+    }
+    
+    public void setPosition(PVector position) {
+        this.position = position;
+    }
+    
+    public PVector getPosition() {
+        return this.position;
     }
 }
