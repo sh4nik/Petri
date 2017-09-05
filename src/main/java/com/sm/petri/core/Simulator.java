@@ -49,7 +49,8 @@ public class Simulator extends PApplet {
     public void settings() {
         size(1900, 900);
 //        seed = 2147483647;
-        seed = floor(random(System.currentTimeMillis()));
+        randomSeed(System.currentTimeMillis());
+        seed = floor(random(999999999));
 
         
         println("Seed: " + seed);
