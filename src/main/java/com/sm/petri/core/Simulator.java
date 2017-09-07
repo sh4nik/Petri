@@ -14,9 +14,9 @@ public class Simulator extends PApplet {
     List<Bloop> bloops = new ArrayList<>();
     List<Food> foodList = new ArrayList<>();
 
-    private static final int BLOB_COUNT = 2;
-    private static final int MAX_BLOB_COUNT = 50;
-    private static final int FOOD_COUNT = 100;
+    private static final int BLOB_COUNT = 200;
+    private static final int MAX_BLOB_COUNT = 200;
+    private static final int FOOD_COUNT = 150;
     private static final int EVO_FORCE_THRESHOLD_POP = 2;
     private static final float REPRODUCTION_PROBABILITY = 0.0015f;
     private static final float MUTATION_RATE = 0.3f;
@@ -48,12 +48,9 @@ public class Simulator extends PApplet {
     @Override
     public void settings() {
         size(1900, 900);
-//        seed = 2147483647;
+//        seed = 754726784;
         randomSeed(System.currentTimeMillis());
         seed = floor(random(999999999));
-
-        
-        println("Seed: " + seed);
         randomSeed(seed);
 //        fullScreen();
     }
@@ -61,7 +58,7 @@ public class Simulator extends PApplet {
     @Override
     public void setup() {
         for (int i = 0; i < BLOB_COUNT; i++) {
-            bloops.add(new Bloop(this, foodList, null));
+            bloops.add(new Bloop(this, foodList, null, bloops));
         }
     }
 
@@ -84,17 +81,25 @@ public class Simulator extends PApplet {
         Collections.sort(bloops, new Comparator<Bloop>() {
             @Override
             public int compare(Bloop blobA, Bloop blobB) {
-                if (blobB.getHealth() != blobA.getHealth()) {
-                    return blobB.getHealth() > blobA.getHealth() ? 1 : -1;
-                } else {
-                    return -1;
-                }
+                return Double.compare(blobA.getHealth(), blobB.getHealth());
             }
         });
 
         Iterator<Bloop> iter = bloops.iterator();
 
         List<Bloop> newBloops = new ArrayList<>();
+
+//        if (foodList == null || foodList.size() < 6) {
+        for (int i = foodList == null ? 0 : foodList.size(); i < FOOD_COUNT; i++) {
+            foodList.add(new Food(this));
+        }
+//        }
+
+        if (render) {
+            for (Food food : foodList) {
+                food.display();
+            }
+        }
 
         while (iter.hasNext()) {
             Bloop bloop = iter.next();
@@ -114,29 +119,16 @@ public class Simulator extends PApplet {
                 }
             }
 
-//            if (bloop.getHealth() < 300) {
-            if (bloops.size() < MAX_BLOB_COUNT && random(1) < REPRODUCTION_PROBABILITY) {
-                newBloops.add(getNextGenBloop(bloop, bloops.get(0)));
-                bloop.setHealth(bloop.getHealth() - 50);
+            if (bloop.getHealth() > 60) {
+                if (bloops.size() < MAX_BLOB_COUNT && random(1) < REPRODUCTION_PROBABILITY) {
+                    newBloops.add(getNextGenBloop(bloop, bloops.get(0)));
+//                bloop.setHealth(bloop.getHealth() - 30);
+                }
             }
-//            }
         }
-
-        logStats(bloops);
 
         for (Bloop newBloop : newBloops) {
             bloops.add(newBloop);
-        }
-//        if (foodList == null || foodList.size() < 6) {
-        for (int i = foodList == null ? 0 : foodList.size(); i < FOOD_COUNT; i++) {
-            foodList.add(new Food(this));
-        }
-//        }
-
-        if (render) {
-            for (Food food : foodList) {
-                food.display();
-            }
         }
 
         if (!render) {
@@ -144,18 +136,20 @@ public class Simulator extends PApplet {
             strokeWeight(3);
             float newX = graphTime / 5;
             graphTime++;
-            float newY = (height - ((bloops.get(0).getHealth() / 2) % 500));
+            float newY = (height - ((bloops.get(0).getAge() * 10) % 2000));
             line(previousPlotPoint.x, previousPlotPoint.y, newX, newY);
             previousPlotPoint.x = newX;
             previousPlotPoint.y = newY;
             if (previousPlotPoint.x > width) {
                 screenCleared = false;
             }
+            logStats(bloops);
         }
 
     }
 
-    Bloop getNextGenBloop(Bloop bloop) {
+    Bloop getNextGenBloop(Bloop bloop
+    ) {
 
         int brainSize = bloop.getBrain().encodedArrayLength();
         double[] genes = new double[brainSize];
@@ -169,7 +163,7 @@ public class Simulator extends PApplet {
             mut = true;
         }
 
-        Bloop bloopKid = new Bloop(this, foodList, genes);
+        Bloop bloopKid = new Bloop(this, foodList, genes, bloops);
 
         if (mut) {
             bloopKid.setBodyColor(200);
@@ -178,7 +172,8 @@ public class Simulator extends PApplet {
         return bloopKid;
     }
 
-    Bloop getNextGenBloop(Bloop bloopDad, Bloop bloopMom) {
+    Bloop getNextGenBloop(Bloop bloopDad, Bloop bloopMom
+    ) {
 
         int j = floor(random(2));
 
@@ -209,7 +204,7 @@ public class Simulator extends PApplet {
             mut = true;
         }
 
-        Bloop bloopKid = new Bloop(this, foodList, kidGenes);
+        Bloop bloopKid = new Bloop(this, foodList, kidGenes, bloops);
 
         if (mut) {
             bloopKid.setBodyColor(200);
@@ -219,10 +214,11 @@ public class Simulator extends PApplet {
         return bloopKid;
     }
 
-    Bloop getNextGenBloop(List<Bloop> bloops) {
+    Bloop getNextGenBloop(List<Bloop> bloops
+    ) {
 
         if (bloops.size() < 2) {
-            return new Bloop(this, foodList, null);
+            return new Bloop(this, foodList, null, bloops);
         }
 
         int j = floor(random(2));
@@ -253,7 +249,7 @@ public class Simulator extends PApplet {
             kidGenes[floor(random(0, brainSize - 1))] = random(-1, 1);
         }
 
-        return new Bloop(this, foodList, kidGenes);
+        return new Bloop(this, foodList, kidGenes, bloops);
     }
 
     private void logStats(List<Bloop> bloops) {
@@ -264,7 +260,9 @@ public class Simulator extends PApplet {
 //        } else {
 //            println(log);
 //        }
-        println("Fittest Brain [" + bloops.get(0).getId() + "]: " + bloops.get(0).getBrain().dumpWeights());
+        if (bloops.size() > 0) {
+            println(seed + " Fittest Brain [" + bloops.get(0).getId() + "]: " + bloops.get(0).getBrain().dumpWeights());
+        }
     }
 
     @Override

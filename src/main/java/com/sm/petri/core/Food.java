@@ -8,7 +8,7 @@ public class Food {
     private float size = 5;
     private int color = 50;
     private boolean poison;
-    
+
     private PVector position;
     private PApplet parent;
 
@@ -17,7 +17,7 @@ public class Food {
         float x = this.parent.random(1) * this.parent.width;
         float y = this.parent.random(1) * this.parent.height;
         this.position = new PVector(x, y);
-        if(this.parent.random(1) > 0.3) {
+        if (this.parent.random(1) > 0.2) {
             this.poison = false;
         } else {
             this.poison = true;
@@ -26,13 +26,13 @@ public class Food {
     }
 
     public void display() {
-        
-        if(!poison) {
+
+        if (!poison) {
             this.parent.fill(160, 255, 160);
         } else {
             this.parent.fill(255, 160, 160);
         }
-        
+
         this.parent.strokeWeight(0);
         this.parent.pushMatrix();
         this.parent.translate(position.x, position.y);
@@ -63,9 +63,9 @@ public class Food {
     public void setPosition(PVector position) {
         this.position = position;
     }
-    
+
     public boolean isPoison() {
         return poison;
     }
-    
+
 }
