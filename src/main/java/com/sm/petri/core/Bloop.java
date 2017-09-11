@@ -56,8 +56,8 @@ public class Bloop {
         this.maxSpeed = 3;
 
         brain = new BasicNetwork();
-        brain.addLayer(new BasicLayer(null, true, 7));
-        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 12));
+        brain.addLayer(new BasicLayer(null, true, 10));
+        brain.addLayer(new BasicLayer(new ActivationTANH(), true, 8));
         brain.addLayer(new BasicLayer(new ActivationTANH(), false, 7));
         brain.getStructure().finalizeStructure();
         brain.reset((int) this.parent.random(999999999));
@@ -77,6 +77,7 @@ public class Bloop {
         calculateNextMove();
         updateMotion();
         wrapBorders();
+//        blockBorders();
         processNearestFood();
         processNearestBloop();
     }
@@ -85,7 +86,7 @@ public class Bloop {
         float theta = velocity.heading2D() + PApplet.PI / 2;
 
         if (isBest) {
-            this.parent.fill(180, 100, 240);
+            this.parent.fill(230, 42, 110);
             this.parent.stroke(40);
         } else {
             if (bodyColor < 0) {
@@ -166,16 +167,15 @@ public class Bloop {
                 nearestFoodIsPoison,
                 nearestBloopVectorX,
                 nearestBloopVectorY,
-                nearestBloopIsHostile
-//              nearestBloopR,
-//              nearestBloopG,
-//              nearestBloopB,
-            };
+                nearestBloopIsHostile,
+                nearestBloopR,
+                nearestBloopG,
+                nearestBloopB,};
 
             double[] actionData = new double[7];
 
             brain.compute(senseData, actionData);
-            
+
             // Output
             double steeringVectorX = actionData[0];
             double steeringVectorY = actionData[1];
@@ -184,7 +184,7 @@ public class Bloop {
             double myR = actionData[4];
             double myG = actionData[5];
             double myB = actionData[6];
-            
+
             velocity = velocity.add(new PVector(PApplet.map((float) steeringVectorX, -1, 1, -rotationLimit, rotationLimit), PApplet.map((float) steeringVectorY, -1, 1, -rotationLimit, rotationLimit)));
             this.maxSpeed = PApplet.map((float) speed, -1, 1, 0, 1) * 2.2f;
             hostile = hostility > 0.5;
@@ -205,7 +205,7 @@ public class Bloop {
     }
 
     private void updateHealth() {
-        health -= (float) deathRate;
+        health -= (float) deathRate * (hostile ? 3 : 1);
         age += 0.005;
         size = age < 16 ? age : 16;
     }
@@ -278,7 +278,7 @@ public class Bloop {
             if (!hostile && nearestFood != null && d < ((size < nearestFood.getSize()) ? nearestFood.getSize() : size - nearestFood.getSize())) {
                 iter.remove();
                 if (nearestFood.isPoison()) {
-                    health -= (float) foodHealth;
+                    health -= (float) foodHealth * 5;
                 } else {
                     health += (float) foodHealth;
                 }

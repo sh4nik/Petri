@@ -15,10 +15,10 @@ public class Simulator extends PApplet {
     List<Food> foodList = new ArrayList<>();
 
     private static final int BLOB_COUNT = 200;
-    private static final int MAX_BLOB_COUNT = 200;
-    private static final int FOOD_COUNT = 150;
+    private static final int MAX_BLOB_COUNT = 400;
+    private static final int FOOD_COUNT = 200;
     private static final int EVO_FORCE_THRESHOLD_POP = 2;
-    private static final float REPRODUCTION_PROBABILITY = 0.0015f;
+    private static final float REPRODUCTION_PROBABILITY = 0.004f;
     private static final float MUTATION_RATE = 0.3f;
 
     private boolean render = true;
@@ -48,7 +48,7 @@ public class Simulator extends PApplet {
     @Override
     public void settings() {
         size(1900, 900);
-//        seed = 754726784;
+//        seed = 654620800;
         randomSeed(System.currentTimeMillis());
         seed = floor(random(999999999));
         randomSeed(seed);
@@ -81,7 +81,7 @@ public class Simulator extends PApplet {
         Collections.sort(bloops, new Comparator<Bloop>() {
             @Override
             public int compare(Bloop blobA, Bloop blobB) {
-                return Double.compare(blobA.getHealth(), blobB.getHealth());
+                return Double.compare(blobB.getHealth(), blobA.getHealth());
             }
         });
 
@@ -186,14 +186,20 @@ public class Simulator extends PApplet {
 
         double[] kidGenes = new double[brainSize];
 
-        int splicePoint = (int) floor(random(brainSize / 4, brainSize / 4 * 3));
+        if (random(1) > 0.3) {
 
-        for (int i = 0; i < brainSize; i++) {
-            if (i < splicePoint) {
-                kidGenes[i] = dadGenes[i];
-            } else {
-                kidGenes[i] = momGenes[i];
+            int splicePoint = (int) floor(random(brainSize / 4, brainSize / 4 * 3));
+
+            for (int i = 0; i < brainSize; i++) {
+                if (i < splicePoint) {
+                    kidGenes[i] = dadGenes[i];
+                } else {
+                    kidGenes[i] = momGenes[i];
+                }
             }
+
+        } else {
+            kidGenes = dadGenes.clone();
         }
 
         boolean mut = false;
