@@ -28,15 +28,30 @@ public class Food {
     public void display() {
 
         if (!poison) {
-            this.parent.fill(160, 255, 160);
+            this.parent.fill(100, 180, 100);
         } else {
-            this.parent.fill(255, 160, 160);
+            this.parent.fill(180, 100, 100);
         }
 
         this.parent.strokeWeight(0);
         this.parent.pushMatrix();
         this.parent.translate(position.x, position.y);
         this.parent.ellipse(0, 0, size, size);
+        this.parent.popMatrix();
+    }
+    
+    public void displayPainter() {
+
+        if (!poison) {
+            this.parent.fill(100, 180, 100);
+        } else {
+            this.parent.fill(180, 100, 100);
+        }
+
+        this.parent.strokeWeight(0);
+        this.parent.pushMatrix();
+        this.parent.translate(position.x, position.y);
+        
         this.parent.popMatrix();
     }
 

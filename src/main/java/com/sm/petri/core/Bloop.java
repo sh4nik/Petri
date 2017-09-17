@@ -12,7 +12,7 @@ public class Bloop {
 
     //common bloop stuff
     public static int lastId = 0;
-    private static float deathRate = 1;
+    private static float deathRate = 0.8f;
     private static float foodHealth = 500;
 
     //attributes of the individual bloop
@@ -42,7 +42,7 @@ public class Bloop {
     PVector position;
     PVector velocity;
 
-    public Bloop(PApplet parent, List<Food> foodList, double[] providedGenes, List<Bloop> bloopList) {
+    public Bloop(PApplet parent, List<Food> foodList, double[] providedGenes, List<Bloop> bloopList, PVector pos) {
 
         //initialize values
         this.id = lastId++;
@@ -69,7 +69,7 @@ public class Bloop {
         float x = this.parent.random(1) * this.parent.width;
         float y = this.parent.random(1) * this.parent.height;
         velocity = new PVector(0, 0);
-        position = new PVector(x, y);
+        position = pos == null ? new PVector(x, y) : pos;
     }
 
     public void update() {
@@ -86,7 +86,7 @@ public class Bloop {
         float theta = velocity.heading2D() + PApplet.PI / 2;
 
         if (isBest) {
-            this.parent.fill(230, 42, 110);
+            this.parent.fill(180, 100, 220);
             this.parent.stroke(40);
         } else {
             if (bodyColor < 0) {
@@ -132,6 +132,22 @@ public class Bloop {
         this.parent.rotate(-theta);
         this.parent.fill(100);
         //this.parent.text(id, -10, size * 1.5f);
+        this.parent.popMatrix();
+    }
+
+    public void displayPainter() {
+        float theta = velocity.heading2D() + PApplet.PI / 2;
+
+        this.parent.fill(0);
+
+        this.parent.pushMatrix();
+        this.parent.translate(position.x, position.y);
+        this.parent.rotate(theta);
+        this.parent.ellipse(0, 0, size, size);
+
+        this.parent.fill(r, g, b);
+        this.parent.rect(-size / 4, 0, size / 2, size / 2, size);
+
         this.parent.popMatrix();
     }
 
@@ -186,7 +202,7 @@ public class Bloop {
             double myB = actionData[6];
 
             velocity = velocity.add(new PVector(PApplet.map((float) steeringVectorX, -1, 1, -rotationLimit, rotationLimit), PApplet.map((float) steeringVectorY, -1, 1, -rotationLimit, rotationLimit)));
-            this.maxSpeed = PApplet.map((float) speed, -1, 1, 0, 1) * 2.2f;
+            this.maxSpeed = PApplet.map((float) speed, -1, 1, 0, 1) * 2;
             hostile = hostility > 0.5;
             r = (int) Math.floor((double) PApplet.map((float) myR, -1, 1, 100, 255));
             g = (int) Math.floor((double) PApplet.map((float) myG, -1, 1, 100, 255));
@@ -205,7 +221,7 @@ public class Bloop {
     }
 
     private void updateHealth() {
-        health -= (float) deathRate * (hostile ? 3 : 1);
+        health -= (float) deathRate * (hostile ? 10 : 1);
         age += 0.005;
         size = age < 16 ? age : 16;
     }
@@ -259,7 +275,7 @@ public class Bloop {
                 health += foodHealth * 2;
                 nearestBloop.setHealth(nearestBloop.getHealth() - (foodHealth * 5));
             } else {
-                health += health < 50 ? deathRate * 0.6 : health < 500 ? deathRate * 0.4 : 0;
+//                health += health < 50 ? deathRate * 0.6 : health < 500 ? deathRate * 0.4 : 0;
             }
         }
     }
@@ -278,7 +294,7 @@ public class Bloop {
             if (!hostile && nearestFood != null && d < ((size < nearestFood.getSize()) ? nearestFood.getSize() : size - nearestFood.getSize())) {
                 iter.remove();
                 if (nearestFood.isPoison()) {
-                    health -= (float) foodHealth * 5;
+                    health -= (float) foodHealth * 10;
                 } else {
                     health += (float) foodHealth;
                 }

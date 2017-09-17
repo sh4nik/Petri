@@ -14,14 +14,17 @@ public class Simulator extends PApplet {
     List<Bloop> bloops = new ArrayList<>();
     List<Food> foodList = new ArrayList<>();
 
-    private static final int BLOB_COUNT = 200;
+    private static final int BLOB_COUNT = 1000;
     private static final int MAX_BLOB_COUNT = 400;
     private static final int FOOD_COUNT = 200;
     private static final int EVO_FORCE_THRESHOLD_POP = 2;
     private static final float REPRODUCTION_PROBABILITY = 0.004f;
+    private static final float REPRODUCTION_AGE = 14;
     private static final float MUTATION_RATE = 0.3f;
 
     private boolean render = true;
+
+    private boolean paint = true;
 
     private int tthg = 0;
 
@@ -48,9 +51,9 @@ public class Simulator extends PApplet {
     @Override
     public void settings() {
         size(1900, 900);
-//        seed = 654620800;
-        randomSeed(System.currentTimeMillis());
-        seed = floor(random(999999999));
+        seed = 955822912;
+//        randomSeed(System.currentTimeMillis());
+//        seed = floor(random(999999999));
         randomSeed(seed);
 //        fullScreen();
     }
@@ -58,23 +61,27 @@ public class Simulator extends PApplet {
     @Override
     public void setup() {
         for (int i = 0; i < BLOB_COUNT; i++) {
-            bloops.add(new Bloop(this, foodList, null, bloops));
+            bloops.add(new Bloop(this, foodList, null, bloops, null));
+        }
+        if (paint) {
+            background(0);
         }
     }
 
     @Override
     public void draw() {
+        if (!paint) {
+            background(50);
+        }
         if (!render) {
             frameRate(600);
             if (!screenCleared) {
-                background(50);
                 screenCleared = true;
                 graphTime = 0;
                 previousPlotPoint = new PVector(0, 1000);
             }
         } else {
             frameRate(60);
-            background(50);
             screenCleared = false;
         }
 
@@ -97,7 +104,11 @@ public class Simulator extends PApplet {
 
         if (render) {
             for (Food food : foodList) {
-                food.display();
+                if (!paint) {
+                    food.display();
+                } else {
+                    food.displayPainter();
+                }
             }
         }
 
@@ -109,19 +120,23 @@ public class Simulator extends PApplet {
             bloops.get(0).isBest = true;
 
             if (render) {
-                bloop.display();
+                if (!paint) {
+                    bloop.display();
+                } else {
+                    bloop.displayPainter();
+                }
             }
 
             if (bloop.getHealth() <= 0) {
                 iter.remove();
                 if (bloops.size() < EVO_FORCE_THRESHOLD_POP) {
-                    newBloops.add(getNextGenBloop(bloops));
+                    newBloops.add(new Bloop(this, foodList, null, bloops, null));
                 }
             }
 
             if (bloop.getHealth() > 60) {
-                if (bloops.size() < MAX_BLOB_COUNT && random(1) < REPRODUCTION_PROBABILITY) {
-                    newBloops.add(getNextGenBloop(bloop, bloops.get(0)));
+                if (bloops.size() < MAX_BLOB_COUNT && random(1) < REPRODUCTION_PROBABILITY && bloop.getAge() > REPRODUCTION_AGE) {
+                    newBloops.add(getNextGenBloop(bloop, bloops.get(floor(random(0, bloops.size() > 5 ? 5 : bloops.size())))));
 //                bloop.setHealth(bloop.getHealth() - 30);
                 }
             }
@@ -136,7 +151,7 @@ public class Simulator extends PApplet {
             strokeWeight(3);
             float newX = graphTime / 5;
             graphTime++;
-            float newY = (height - ((bloops.get(0).getAge() * 10) % 2000));
+            float newY = (height - ((bloops.get(0).getHealth() * 0.05f) % 2000));
             line(previousPlotPoint.x, previousPlotPoint.y, newX, newY);
             previousPlotPoint.x = newX;
             previousPlotPoint.y = newY;
@@ -148,32 +163,7 @@ public class Simulator extends PApplet {
 
     }
 
-    Bloop getNextGenBloop(Bloop bloop
-    ) {
-
-        int brainSize = bloop.getBrain().encodedArrayLength();
-        double[] genes = new double[brainSize];
-        bloop.getBrain().encodeToArray(genes);
-
-        boolean mut = false;
-
-        if (random(1) < MUTATION_RATE) {
-            //System.out.println(ANSI_RED + "*************************************************************************************************************" + ANSI_RESET);
-            genes[floor(random(0, brainSize - 1))] = random(-1, 1);
-            mut = true;
-        }
-
-        Bloop bloopKid = new Bloop(this, foodList, genes, bloops);
-
-        if (mut) {
-            bloopKid.setBodyColor(200);
-        }
-
-        return bloopKid;
-    }
-
-    Bloop getNextGenBloop(Bloop bloopDad, Bloop bloopMom
-    ) {
+    Bloop getNextGenBloop(Bloop bloopDad, Bloop bloopMom) {
 
         int j = floor(random(2));
 
@@ -210,7 +200,7 @@ public class Simulator extends PApplet {
             mut = true;
         }
 
-        Bloop bloopKid = new Bloop(this, foodList, kidGenes, bloops);
+        Bloop bloopKid = new Bloop(this, foodList, kidGenes, bloops, new PVector(bloopDad.getPosition().x + 20, bloopDad.getPosition().y + 20));
 
         if (mut) {
             bloopKid.setBodyColor(200);
@@ -220,54 +210,16 @@ public class Simulator extends PApplet {
         return bloopKid;
     }
 
-    Bloop getNextGenBloop(List<Bloop> bloops
-    ) {
-
-        if (bloops.size() < 2) {
-            return new Bloop(this, foodList, null, bloops);
-        }
-
-        int j = floor(random(2));
-
-        Bloop bloopDad = bloops.get(j);
-        int brainSize = bloopDad.getBrain().encodedArrayLength();
-        double[] dadGenes = new double[brainSize];
-        bloopDad.getBrain().encodeToArray(dadGenes);
-
-        Bloop bloopMom = bloops.get(1 - j);
-        double[] momGenes = new double[brainSize];
-        bloopMom.getBrain().encodeToArray(momGenes);
-
-        double[] kidGenes = new double[brainSize];
-
-        int splicePoint = 6;
-
-        for (int i = 0; i < brainSize; i++) {
-            if (i < splicePoint) {
-                kidGenes[i] = dadGenes[i];
-            } else {
-                kidGenes[i] = momGenes[i];
-            }
-        }
-
-        if (random(1) < MUTATION_RATE) {
-            //System.out.println(ANSI_RED + "*************************************************************************************************************" + ANSI_RESET);
-            kidGenes[floor(random(0, brainSize - 1))] = random(-1, 1);
-        }
-
-        return new Bloop(this, foodList, kidGenes, bloops);
-    }
-
     private void logStats(List<Bloop> bloops) {
-//        String log = "TPS " + floor(frameRate) + " : POP " + bloops.size() + " : THG " + (floor(bloops.get(0).getHealth()) - 255) + " / " + tthg + " : BID " + bloops.get(0).getId() + " : " + bloops.get(0).getBrain().dumpWeights();
-//        if ((floor(bloops.get(0).getHealth()) - 255) > tthg) {
-//            tthg = (floor(bloops.get(0).getHealth()) - 255);
-//            println(ANSI_PURPLE + log + ANSI_RESET);
-//        } else {
-//            println(log);
-//        }
+
         if (bloops.size() > 0) {
-            println(seed + " Fittest Brain [" + bloops.get(0).getId() + "]: " + bloops.get(0).getBrain().dumpWeights());
+            String log = seed + " TPS " + floor(frameRate) + " : POP " + bloops.size() + " : THG " + (floor(bloops.get(0).getHealth()) - 255) + " / " + tthg + " : BID " + bloops.get(0).getId() + " : " + bloops.get(0).getBrain().dumpWeights();
+            if ((floor(bloops.get(0).getHealth()) - 255) > tthg) {
+                tthg = (floor(bloops.get(0).getHealth()) - 255);
+                println(ANSI_PURPLE + log + ANSI_RESET);
+            } else {
+                println(log);
+            }
         }
     }
 
