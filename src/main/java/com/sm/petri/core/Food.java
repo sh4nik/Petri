@@ -43,9 +43,9 @@ public class Food {
     public void displayPainter() {
 
         if (!poison) {
-            this.parent.fill(100, 180, 100);
+            this.parent.fill(50, 180, 60);
         } else {
-            this.parent.fill(180, 100, 100);
+            this.parent.fill(180, 50, 60);
         }
 
         this.parent.strokeWeight(0);

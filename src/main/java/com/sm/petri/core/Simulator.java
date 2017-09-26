@@ -17,14 +17,14 @@ public class Simulator extends PApplet {
     private static final int BLOB_COUNT = 1000;
     private static final int MAX_BLOB_COUNT = 400;
     private static final int FOOD_COUNT = 200;
-    private static final int EVO_FORCE_THRESHOLD_POP = 2;
+    private static final int EVO_FORCE_THRESHOLD_POP = 20;
     private static final float REPRODUCTION_PROBABILITY = 0.004f;
     private static final float REPRODUCTION_AGE = 14;
     private static final float MUTATION_RATE = 0.3f;
 
     private boolean render = true;
 
-    private boolean paint = true;
+    private boolean paint = false;
 
     private int tthg = 0;
 
@@ -51,7 +51,7 @@ public class Simulator extends PApplet {
     @Override
     public void settings() {
         size(1900, 900);
-        seed = 955822912;
+        seed = 83554208;
 //        randomSeed(System.currentTimeMillis());
 //        seed = floor(random(999999999));
         randomSeed(seed);
@@ -70,17 +70,19 @@ public class Simulator extends PApplet {
 
     @Override
     public void draw() {
-        if (!paint) {
-            background(50);
-        }
+
         if (!render) {
             frameRate(600);
             if (!screenCleared) {
+                background(50);
                 screenCleared = true;
                 graphTime = 0;
                 previousPlotPoint = new PVector(0, 1000);
             }
         } else {
+            if (!paint) {
+                background(50);
+            }
             frameRate(60);
             screenCleared = false;
         }
@@ -147,26 +149,29 @@ public class Simulator extends PApplet {
         }
 
         if (!render) {
-            stroke(100, 180, 150);
-            strokeWeight(3);
+            stroke(50, 180, 60);
+            strokeWeight(1);
             float newX = graphTime / 5;
             graphTime++;
-            float newY = (height - ((bloops.get(0).getHealth() * 0.05f) % 2000));
+            float newY = (height - ((bloops.get(0).getHealth() * 0.05f) % (height - 50)));
             line(previousPlotPoint.x, previousPlotPoint.y, newX, newY);
             previousPlotPoint.x = newX;
             previousPlotPoint.y = newY;
             if (previousPlotPoint.x > width) {
                 screenCleared = false;
             }
+            fill(30);
+            strokeWeight(0);
+            rect(0, 0, width, 30);
+            fill(100);
+            text(" TPS " + floor(frameRate) + " : POP " + bloops.size() + " : THG " + (floor(bloops.get(0).getHealth()) - 255) + " / " + tthg + " : BID " + bloops.get(0).getId(), 20, 20);
             logStats(bloops);
         }
 
     }
 
     Bloop getNextGenBloop(Bloop bloopDad, Bloop bloopMom) {
-
-        int j = floor(random(2));
-
+        
         int brainSize = bloopDad.getBrain().encodedArrayLength();
         double[] dadGenes = new double[brainSize];
         bloopDad.getBrain().encodeToArray(dadGenes);

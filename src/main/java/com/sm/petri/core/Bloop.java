@@ -56,7 +56,7 @@ public class Bloop {
         this.maxSpeed = 3;
 
         brain = new BasicNetwork();
-        brain.addLayer(new BasicLayer(null, true, 10));
+        brain.addLayer(new BasicLayer(null, true, 7));
         brain.addLayer(new BasicLayer(new ActivationTANH(), true, 8));
         brain.addLayer(new BasicLayer(new ActivationTANH(), false, 7));
         brain.getStructure().finalizeStructure();
@@ -85,6 +85,18 @@ public class Bloop {
     public void display() {
         float theta = velocity.heading2D() + PApplet.PI / 2;
 
+        this.parent.pushMatrix();
+        this.parent.translate(position.x, position.y);
+        this.parent.rotate(theta);
+
+        this.parent.strokeWeight(2);
+
+        if (hostile) {
+            this.parent.fill(90, 50, 50);
+            this.parent.stroke(90, 50, 50);
+            this.parent.ellipse(0, 0, size * 1.2f, size * 1.2f);
+        }
+
         if (isBest) {
             this.parent.fill(180, 100, 220);
             this.parent.stroke(40);
@@ -98,10 +110,6 @@ public class Bloop {
             }
         }
 
-        this.parent.strokeWeight(2);
-        this.parent.pushMatrix();
-        this.parent.translate(position.x, position.y);
-        this.parent.rotate(theta);
         this.parent.ellipse(0, 0, size, size);
         this.parent.line(0, 0, 0, -size / 2);
         if (health < 256) {
@@ -183,10 +191,10 @@ public class Bloop {
                 nearestFoodIsPoison,
                 nearestBloopVectorX,
                 nearestBloopVectorY,
-                nearestBloopIsHostile,
-                nearestBloopR,
-                nearestBloopG,
-                nearestBloopB,};
+                nearestBloopIsHostile, //                nearestBloopR,
+            //                nearestBloopG,
+            //                nearestBloopB
+            };
 
             double[] actionData = new double[7];
 
@@ -272,8 +280,9 @@ public class Bloop {
 
         if (nearestBloop != null && shortestDistance < size * 1.5) {
             if (hostile) {
-                health += foodHealth * 2;
-                nearestBloop.setHealth(nearestBloop.getHealth() - (foodHealth * 5));
+                float absorbtionRate = 3;//(age < 14 ? age : 14) / 3;
+                health += foodHealth * (absorbtionRate / 2);
+                nearestBloop.setHealth(nearestBloop.getHealth() - (foodHealth * absorbtionRate));
             } else {
 //                health += health < 50 ? deathRate * 0.6 : health < 500 ? deathRate * 0.4 : 0;
             }
@@ -294,7 +303,7 @@ public class Bloop {
             if (!hostile && nearestFood != null && d < ((size < nearestFood.getSize()) ? nearestFood.getSize() : size - nearestFood.getSize())) {
                 iter.remove();
                 if (nearestFood.isPoison()) {
-                    health -= (float) foodHealth * 10;
+                    health -= (float) foodHealth * 3;
                 } else {
                     health += (float) foodHealth;
                 }
